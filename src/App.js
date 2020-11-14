@@ -1,25 +1,57 @@
-import logo from './logo.svg';
+import React, { useState } from 'react';
 import './App.css';
+import HomePage from './Home';
+import CardUI from './card'
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
+import SignIn from './SignIn';
+import { connect } from 'react-redux'
+import { loginHandler, logoutHandler } from './userReducer';
+import NoteMaker from './notemaker';
+import ViewNotesScreen from './viewNotesScreen';
+import Appbar from './Appbar'
+import SignUp from './SignUp';
 
-function App() {
+function App(props) {
+  const [loggedIn, setLogged] = useState(props.token ? true : false)
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <React.Fragment>
+        <Switch>
+          <Route path="/transcript" >
+            {!loggedIn ? <SignIn /> : <React.Fragment><Appbar /><CardUI purpose={"TRANSCRIPT A NEW AUDIO"} /></React.Fragment>}
+          </Route>
+          <Route path="/viewsavednotes">
+            {!loggedIn ? <SignIn /> : <React.Fragment><Appbar /><ViewNotesScreen /></React.Fragment>}
+          </Route>
+
+          <Route path="/createnotes">
+            {!loggedIn ? <SignIn /> : <React.Fragment><Appbar /><NoteMaker /></React.Fragment>}
+          </Route>
+          <Route path="/signup">
+            {<SignUp/>}
+          </Route>
+          <Route path="/">
+            {!loggedIn ? <SignIn /> : <React.Fragment><HomePage /></React.Fragment>}
+          </Route>
+
+        </Switch>
+      </React.Fragment>
+    </Router>
   );
 }
 
-export default App;
+const mapStateToProps = (state) => {
+  return {
+    isLoading: state.isLoading,
+    token: state.token
+  }
+
+}
+const mapDispatchToProps = (dispatch) => {
+  return {
+    loginHandler: () => { loginHandler() },
+    logoutHandler: () => { dispatch(logoutHandler()) }
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
